@@ -1,0 +1,22 @@
+global:
+  domain: argocd.homelab.services
+configs:
+  params:
+    server.insecure: true
+    server.repo.server.plaintext: true
+    server.dex.server.plaintext: true
+    controller.repo.server.plaintext: true
+    applicationsetcontroller.repo.server.plaintext: true
+    reposerver.disable.tls: true
+    dexserver.disable.tls: true
+certificate:
+  enabled: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    tls: true

@@ -1,0 +1,20 @@
+
+sources:
+  - service
+  - ingress
+
+
+policy: sync
+
+
+provider:
+  name: rfc2136
+
+extraArgs:
+  - --rfc2136-host=192.168.123.153
+  - --rfc2136-port=53
+  - --rfc2136-zone=homelab.services
+  - --rfc2136-tsig-secret-alg=hmac-sha256
+  - --rfc2136-tsig-secret=6BMx/0t+SGBpSc/CXT+jxtX4C9AnVAZMlshF1LoWOpA=
+  - --rfc2136-tsig-keyname=external-dns
+  - --rfc2136-tsig-axfr

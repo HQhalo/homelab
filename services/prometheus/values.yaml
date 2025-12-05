@@ -1,0 +1,34 @@
+prometheus:
+  enabled: true
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    # securityContext:
+    #   runAsUser: 0
+    #   fsGroup: 0
+    replicas: 1
+    retention: 1d            
+    # storageSpec:
+      # volumeClaimTemplate:
+      #   spec:
+      #     storageClassName: "local-path" 
+      #     accessModes: ["ReadWriteOnce"]
+      #     resources:
+      #       requests:
+      #         storage: 1Gi             
+alertmanager:
+  enabled: false                
+
+grafana:
+  enabled: true
+  service:
+    type: LoadBalancer
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: grafana.homelab.services
+
+kubeStateMetrics:
+  enabled: true                 
+
+nodeExporter:
+  enabled: true 
+

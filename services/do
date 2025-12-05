@@ -1,0 +1,5 @@
+helm upgrade --install  argocd argo/argo-cd   --namespace argocd   --create-namespace   --version 8.6.0 -f argocd/values.yaml
+
+kubectl create namespace monitoring
+kubectl label ns monitoring pod-security.kubernetes.io/enforce=privileged --overwrite
+helm upgrade --install  kube-prometheus-stack prometheus-community/kube-prometheus-stack   --namespace monitoring --version 77.5.0   -f prometheus/values.yaml
