@@ -1,0 +1,143 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glance
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: glance
+  template:
+    metadata:
+      labels:
+        app: glance
+    spec:
+      containers:
+        - image: glanceapp/glance:v0.8.4
+          name: glance
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+            - name: assets-volume
+              mountPath: /app/assets
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: glance-config
+        - name: assets-volume
+          configMap:
+            name: glance-assets
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: glance
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: glance
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: glance
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: glance.homelab.services
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: glance
+                port:
+                  number: 80
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: glance-config
+  namespace: default
+data:
+  home.yml: |-
+    - name: Home
+      # Optionally, if you only have a single page you can hide the desktop navigation for a cleaner look
+      # hide-desktop-navigation: true
+      columns:
+        - size: small
+          widgets:
+            - type: hacker-news
+              limit: 50
+              collapse-after: 10
+
+
+        - size: full
+          widgets:
+            - type: iframe
+              source: https://linkding.moonlightblue.click
+              height: 500
+            - type: rss
+              style: horizontal-cards
+              limit: 15
+              collapse-after: 5
+              cache: 1h
+              feeds:
+                - url: https://vnexpress.net/rss/tin-moi-nhat.rss
+                  title: Vnexpress
+              
+            
+        - size: small
+          widgets:
+            - type: to-do
+
+            - type: markets
+              markets:
+                - symbol: SPY
+                  name: S&P 500
+                - symbol: BTC-USD
+                  name: Bitcoin
+                - symbol: NVDA
+                  name: NVIDIA
+                - symbol: AAPL
+                  name: Apple
+                - symbol: MSFT
+                  name: Microsoft
+
+  glance.yml: |-
+    server:
+      assets-path: /app/assets
+    auth:
+      secret-key: QFAfMhFUc4H6iymlC0Wx5C1YkMRriLR31eA8AaH49PEOLzCNlTE1zkYnEC9bH8URGrQQXMJypOIR+jMoLD8Snw==
+      users:
+        admin:
+          password: q76GmTJOpEoRTZA8
+    theme:
+      # Note: assets are cached by the browser, changes to the CSS file
+      # will not be reflected until the browser cache is cleared (Ctrl+F5)
+      custom-css-file: /assets/user.css
+
+    pages:
+      # It's not necessary to create a new file for each page and include it, you can simply
+      # put its contents here, though multiple pages are easier to manage when separated
+      - $include: home.yml
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: glance-assets
+  namespace: default
+data:
+  user.css: |-

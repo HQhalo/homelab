@@ -6,7 +6,8 @@ resource "helm_release" "ingress_nginx" {
   
   namespace  = "ingress-nginx"
   create_namespace = true
-
+  upgrade_install = true
+  
   set = [
     {
       name  = "controller.service.type"
@@ -27,6 +28,10 @@ resource "helm_release" "ingress_nginx" {
     {
       name  = "controller.podAnnotations.prometheus.io/port"
       value = 10254
+    },
+    {
+      name  = "controller.allowSnippetAnnotations"
+      value = true
     },
   ]
 }

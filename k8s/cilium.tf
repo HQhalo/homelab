@@ -131,6 +131,10 @@ data "helm_template" "cilium" {
       value = "false"
     },
     {
+      name  = "hubble.enabled"
+      value = "false"
+    },
+    {
       name  = "hubble.peerService.clusterDomain"
       value = "${var.cluster_name}.local"
     }

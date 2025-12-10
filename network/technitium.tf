@@ -2,7 +2,7 @@ resource "proxmox_lxc" "technitium" {
   target_node  = var.target_node
   ostemplate   = var.lxc_template
   hostname     = "technitiumdns"
-  vmid         = var.vmid
+  vmid         = 153
 
   unprivileged = true
 
@@ -20,7 +20,7 @@ resource "proxmox_lxc" "technitium" {
   network {
     name   = "eth0"
     bridge = "vmbr0"
-    ip     = "${var.container_ip}/24"
+    ip     = "${var.techitium_ip}/24"
     gw     = var.gateway
   }
 
@@ -39,7 +39,7 @@ resource "proxmox_lxc" "technitium" {
     connection {
       type        = "ssh"
       port        = 22
-      host        = var.container_ip
+      host        = var.techitium_ip
       user        = "root"
       private_key = base64decode(var.ssh_private_key)
     }

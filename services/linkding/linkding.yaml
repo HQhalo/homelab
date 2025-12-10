@@ -1,0 +1,85 @@
+kind: "PersistentVolumeClaim"
+apiVersion: "v1"
+metadata:
+  name: linkding
+  namespace: default  
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: "1Gi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linkding
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: linkding
+  template:
+    metadata:
+      labels:
+        app: linkding
+    spec:
+      volumes:
+        - name: "data"
+          persistentVolumeClaim:
+            claimName: linkding
+      containers:
+        - image: ghcr.io/sissbruecker/linkding:1.44.1-alpine
+          name: linkding
+          volumeMounts:
+            - name: data
+              mountPath: /etc/linkding/data
+          ports:
+            - containerPort: 9090
+          env:
+            - name: LD_SUPERUSER_NAME
+              value: admin
+            - name: LD_SUPERUSER_PASSWORD
+              value: sKNkJzNRwWSsNRbT
+            - name: LD_CSRF_TRUSTED_ORIGINS
+              value: https://linkding.moonlightblue.click
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: linkding
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 9090
+  selector:
+    app: linkding
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: linkding
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-hide-headers: "X-Frame-Options"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: ALLOWALL";
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: linkding.homelab.services
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: linkding
+                port:
+                  number: 80

@@ -21,11 +21,38 @@ alertmanager:
 
 grafana:
   enabled: true
-  service:
-    type: LoadBalancer
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: grafana.homelab.services
+  # service:
+  #   type: LoadBalancer
+  #   annotations:
+  #     external-dns.alpha.kubernetes.io/hostname: grafana.homelab.services
+  podSecurityContext:
+    runAsUser: 472
+    runAsGroup: 472
+    fsGroup: 472
 
+  initChownData:
+    enabled: false 
+
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: my-ca-issuer
+
+    ingressClassName: nginx
+    hosts:
+    - grafana.homelab.services
+    tls:
+    - secretName: grafana-tls
+      hosts:
+      - grafana.homelab.services
+  persistence:
+    enabled: true
+    storageClassName: "local-path"
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+
+    
 kubeStateMetrics:
   enabled: true                 
 
