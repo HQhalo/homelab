@@ -3,3 +3,5 @@ helm upgrade --install  argocd argo/argo-cd   --namespace argocd   --create-name
 kubectl create namespace monitoring
 kubectl label ns monitoring pod-security.kubernetes.io/enforce=privileged --overwrite
 helm upgrade --install  kube-prometheus-stack prometheus-community/kube-prometheus-stack   --namespace monitoring --version 77.5.0   -f prometheus/values.yaml
+
+helm upgrade --install open-webui open-webui/open-webui --namespace ollama --create-namespace  -f ./ollama/values.yaml

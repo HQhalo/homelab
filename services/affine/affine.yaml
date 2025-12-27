@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: affine-uploads-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi 
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: affine-config-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 50Mi 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine
+  labels:
+    app: affine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affine
+  template:
+    metadata:
+      labels:
+        app: affine
+    spec:
+      initContainers:
+        - name: affine-migration
+          image: ghcr.io/toeverything/affine:stable
+          command: ['sh', '-c', 'node ./scripts/self-host-predeploy.js']
+          volumeMounts:
+            - name: uploads-storage
+              mountPath: /root/.affine/storage
+            - name: config-storage
+              mountPath: /root/.affine/config
+          env:
+            - name: REDIS_SERVER_HOST
+              value: redis-0.redis.default.svc.k8s-dev-homelab.local
+            - name: DATABASE_URL
+              value: postgresql://usr_affine_rw:nAKxTIV0vRNkj13S@postgres.default.svc.k8s-dev-homelab.local:5432/affine
+            - name: AFFINE_INDEXER_ENABLED
+              value: "false"
+      containers:
+        - name: affine
+          image: ghcr.io/toeverything/affine:stable
+          ports:
+            - containerPort: 3010
+          volumeMounts:
+            - name: uploads-storage
+              mountPath: /root/.affine/storage
+            - name: config-storage
+              mountPath: /root/.affine/config
+          env:
+            - name: REDIS_SERVER_HOST
+              value: redis-0.redis.default.svc.k8s-dev-homelab.local
+            - name: DATABASE_URL
+              value: postgresql://usr_affine_rw:nAKxTIV0vRNkj13S@postgres.default.svc.k8s-dev-homelab.local:5432/affine
+            - name: AFFINE_INDEXER_ENABLED
+              value: "false"
+      restartPolicy: Always 
+      volumes:
+        - name: uploads-storage
+          persistentVolumeClaim:
+            claimName: affine-uploads-pvc
+        - name: config-storage
+          persistentVolumeClaim:
+            claimName: affine-config-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine-service
+spec:
+  selector:
+    app: affine
+  ports:
+    - protocol: TCP
+      port: 3010 
+      targetPort: 3010 
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: affine-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: affine.homelab.services
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: affine-service
+                port:
+                  number: 3010

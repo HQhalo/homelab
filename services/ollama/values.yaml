@@ -1,0 +1,20 @@
+
+image:
+  tag: "0.13.4-rc1"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: ollama.homelab.services
+      paths:
+        - path: /
+          pathType: Prefix
+
+persistentVolume:
+  enabled: true
+  size: 10Gi
+  storageClass: "local-path"
+
+tests:
+  enabled: false
