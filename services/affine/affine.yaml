@@ -96,8 +96,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: affine-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: my-ca-issuer
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+      - affine.homelab.services
+      secretName: affine-tls
   rules:
     - host: affine.homelab.services
       http:

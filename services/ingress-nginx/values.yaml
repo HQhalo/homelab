@@ -1,0 +1,14 @@
+controller:
+  replicaCount: 2
+  allowSnippetAnnotations: true
+
+  service:
+    type: LoadBalancer
+    loadBalancerIP: 192.168.123.50
+
+  metrics:
+    enabled: true
+
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10254"

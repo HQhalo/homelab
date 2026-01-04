@@ -33,7 +33,7 @@ resource "proxmox_virtual_environment_vm" "controller" {
     type = "qxl"
   }
   network_device {
-    bridge = "vmbr1"
+    bridge = "vmbr0"
   }
   tpm_state {
     datastore_id = "local"
@@ -97,7 +97,7 @@ resource "proxmox_virtual_environment_vm" "worker" {
     type = "qxl"
   }
   network_device {
-    bridge = "vmbr1"
+    bridge = "vmbr0"
   }
   tpm_state {
     datastore_id = "local"
